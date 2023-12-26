@@ -1,2 +1,7 @@
-package org.example.services;public class ContactRepository {
+package org.example.services;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public interface ContactService {
 }

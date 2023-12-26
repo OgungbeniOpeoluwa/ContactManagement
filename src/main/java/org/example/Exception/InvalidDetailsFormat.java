@@ -1,7 +1,7 @@
 package org.example.Exception;
 
-public class InvalidDetailsFormart extends RuntimeException {
-    public InvalidDetailsFormart(String message) {
+public class InvalidDetailsFormat extends RuntimeException {
+    public InvalidDetailsFormat(String message) {
         super(message);
     }
 }
