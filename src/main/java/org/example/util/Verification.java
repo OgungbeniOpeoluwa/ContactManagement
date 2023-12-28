@@ -6,10 +6,26 @@ public class Verification {
         return email.matches("[a-zA-Z\\d+/_@.-]+@[a-z]+[/.][a-z]{2,3}");
     }
    public static boolean verifyPhoneNumber(String phoneNumber){
-       return phoneNumber.matches("[+][1-9][0-9]{6,12}");
+        if(phoneNumber.startsWith("+")) return phoneNumber.matches("[+][1-9][0-9]{6,12}");
+        else return phoneNumber.matches("0[7-9][0-1][0-9]{8}");
     }
     public static boolean verifyPassword(String password){
         return password.matches("[A-Z][A-Za-z0-9/@-_.?:^&!(){}#*%$]{8,20}");
+    }
+
+    public static String getExitedPasswordSaltValue(String password){
+        String result = "";
+        for(int count = 0; count < EncryptPassword.getLength();count++){
+            result+=password.charAt(count);
+        }
+        return result;
+    }
+    public static String clearSaltValueInPassword(String password){
+        String result = "";
+        for(int count = EncryptPassword.getLength(); count < password.length();count++){
+            result+=password.charAt(count);
+        }
+        return result;
     }
 
 

@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class User {
+public class ContactApp {
     @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,6 +17,7 @@ public class User {
     private String phoneNumber;
     private String email;
     private String  password;
+    private boolean isLocked = true;
 
 
 }
