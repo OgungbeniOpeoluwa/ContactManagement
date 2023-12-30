@@ -15,5 +15,6 @@ public class Contact {
     private String name;
     private String phoneNumber;
     private Long contactAppId;
+    private boolean isBlocked;
 
 }

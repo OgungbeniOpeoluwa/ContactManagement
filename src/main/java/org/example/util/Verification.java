@@ -10,7 +10,7 @@ public class Verification {
         else return phoneNumber.matches("0[7-9][0-1][0-9]{8}");
     }
     public static boolean verifyPassword(String password){
-        return password.matches("[A-Z][A-Za-z0-9/@-_.?:^&!(){}#*%$]{8,20}");
+        return password.matches("[A-Z][a-zA-Z]{4,}[0-9/@-_.?:^&!(){}#*%$]{1,}");
     }
 
     public static String getExitedPasswordSaltValue(String password){

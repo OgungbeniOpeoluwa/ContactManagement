@@ -1,10 +1,12 @@
 package org.example.services;
 
+import org.example.Exception.InvalidContactDetails;
 import org.example.Exception.InvalidDetailsFormat;
 import org.example.data.model.Contact;
 import org.example.data.repository.ContactRepository;
-import org.example.dto.AddContactRequest;
-import org.example.dto.EditContactRequest;
+import org.example.dto.request.AddContactRequest;
+import org.example.dto.request.EditContactRequest;
+import org.example.dto.response.ActionDoneException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +59,35 @@ public class ContactServiceImpl implements ContactService{
         for(Contact contact: userContact){
             if(contact.getName().equals(name))return contact;
         }
-        return null;
+        throw new InvalidContactDetails("contact doesn't exit");
+    }
+
+    @Override
+    public void deleteContact(Long id, String name) {
+        Contact contact = findContacts(id, name);
+        contactRepository.delete(contact);
+    }
+
+    @Override
+    public void deleteAllContact(Long id) {
+        List<Contact> contacts = findAllContactBelongingToUser(id);
+        if(contacts.isEmpty())throw new InvalidContactDetails("No contact saved under this id");
+        contactRepository.deleteAll(contacts);
+    }
+
+    @Override
+    public void blockContact(Long id, String contactName) {
+        Contact contact = findContacts(id,contactName);
+        if(contact.isBlocked())throw new ActionDoneException("Contact has been blocked already");
+        contact.setBlocked(true);
+        contactRepository.save(contact);
+    }
+
+    @Override
+    public void unBlockContact(long id, String contactName) {
+        Contact contact = findContacts(id,contactName);
+        if(!contact.isBlocked())throw new ActionDoneException("Contact is not blocked");
+        contact.setBlocked(false);
+        contactRepository.save(contact);
     }
 }

@@ -18,6 +18,13 @@ public class ContactApp {
     private String email;
     private String  password;
     private boolean isLocked = true;
+    @Override
+    public String toString(){
+        return String.format("""
+                Full Name: %s %s
+                Phone Number: %s
+                Email: %s""",firstName,lastName,phoneNumber,email);
+    }
 
 
 }
