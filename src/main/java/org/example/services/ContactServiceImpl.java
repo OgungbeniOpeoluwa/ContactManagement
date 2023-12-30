@@ -6,7 +6,7 @@ import org.example.data.model.Contact;
 import org.example.data.repository.ContactRepository;
 import org.example.dto.request.AddContactRequest;
 import org.example.dto.request.EditContactRequest;
-import org.example.dto.response.ActionDoneException;
+import org.example.Exception.ActionDoneException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

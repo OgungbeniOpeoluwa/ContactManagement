@@ -1,4 +1,4 @@
-package org.example.dto.response;
+package org.example.Exception;
 
 import org.example.Exception.ContactAppException;
 
