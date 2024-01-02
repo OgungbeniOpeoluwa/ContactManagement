@@ -19,8 +19,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
-@TestPropertySource(locations = "classpath:test.properties")
-@Transactional
+
 class ContactAppServiceImplTest {
 @Autowired
    private ContactAppService userService;
@@ -81,7 +80,8 @@ public void setUpLoginDetails(){
 }
 @Test
     public void testThatUserCantLoginWithWrongPassword(){
-    userService.register(registerRequest);
+    Long id = userService.register(registerRequest);
+    loginRequest.setId(id);
         loginRequest.setPassword("opemmuujg123@");
     assertThrows(InvalidDetailsFormat.class,()->userService.login(loginRequest));
 }
