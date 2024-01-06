@@ -7,6 +7,7 @@ import org.example.data.repository.ContactRepository;
 import org.example.dto.request.AddContactRequest;
 import org.example.dto.request.EditContactRequest;
 import org.example.Exception.ActionDoneException;
+import org.example.util.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +21,8 @@ public class ContactServiceImpl implements ContactService{
     ContactRepository contactRepository;
     @Override
     public void addContact(AddContactRequest contact) {
-        Contact contacts = new Contact();
         if(checkIfNameExitInContact(contact.getId(), contact.getName()))throw new InvalidDetailsFormat("Name already exist");
-        contacts.setName(contact.getName());
-        contacts.setPhoneNumber(contact.getPhoneNumber());
-        contacts.setContactAppId(contact.getId());
+       Contact contacts = Mapper.map(contact);
         contactRepository.save(contacts);
     }
     private boolean checkIfNameExitInContact(Long id,String name){
