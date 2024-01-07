@@ -24,10 +24,5 @@ public class Mapper {
 
     }
 
-    public static VerifyPasswordDetails mapPasswords(Long id, String newPassword) {
-        VerifyPasswordDetails passwordDetails = new VerifyPasswordDetails();
-        passwordDetails.setId(id);
-        passwordDetails.setPassword(newPassword);
-       return passwordDetails;
-    }
+
 }

@@ -1,5 +1,6 @@
 package org.example.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.Exception.InvalidDetailsFormat;
 import org.example.Exception.InvalidLoginDetailsException;
 import org.example.Exception.UserExistException;
@@ -10,7 +11,6 @@ import org.example.dto.request.*;
 import org.example.Exception.ActionDoneException;
 import org.example.util.EncryptPassword;
 import org.example.util.Mapper;
-import org.example.util.VerifyPasswordDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +20,7 @@ import java.util.Optional;
 import static org.example.util.Verification.*;
 
 @Service
+@Slf4j
 public class ContactAppServiceImpl implements ContactAppService{
     @Autowired
     ContactAppRepository userRepository;
@@ -44,8 +45,7 @@ public class ContactAppServiceImpl implements ContactAppService{
     public void login(LoginRequest loginRequest) {
         Optional<ContactApp> user = userRepository.findById(loginRequest.getId());
         if(user.isEmpty())throw new InvalidLoginDetailsException("Invalid details");
-        VerifyPasswordDetails passwordDetails = Mapper.mapPasswords(loginRequest.getId(),loginRequest.getPassword());
-        verifyPasswordDetails(passwordDetails);
+        verifyPasswordDetails(user.get().getId(),loginRequest.getPassword());
         if(!user.get().isLocked()) throw  new ActionDoneException("You have already login");
         user.get().setLocked(false);
         userRepository.save(user.get());
@@ -139,12 +139,16 @@ public class ContactAppServiceImpl implements ContactAppService{
 
     @Override
     public void resetPassword(Long id, String oldPassword, String newPassword) {
-        checkValid(id);
+        log.info("1");
         Optional<ContactApp> contactApp = userRepository.findById(id);
-        VerifyPasswordDetails passwordDetails = Mapper.mapPasswords(id, newPassword);
-        verifyPasswordDetails(passwordDetails);
+        if(contactApp.isEmpty())throw new UserExistException("Invalid details");
+        log.info("2");
+        verifyPasswordDetails(id,oldPassword);
+        log.info("3");
         if(!verifyPassword(newPassword)) throw new InvalidDetailsFormat("wrong password format");
+        log.info("4");
         contactApp.get().setPassword(newPassword);
+        log.info("5");
         userRepository.save(contactApp.get());
 
 
@@ -190,10 +194,10 @@ public class ContactAppServiceImpl implements ContactAppService{
         ContactApp user = userRepository.findByEmail(email);
         return user == null;
     }
-    private void  verifyPasswordDetails(VerifyPasswordDetails passwordDetails){
-        Optional<ContactApp> user = userRepository.findById(passwordDetails.getId());
+    private void  verifyPasswordDetails(Long id,String newPassword){
+        Optional<ContactApp> user = userRepository.findById(id);
         String salt = getExitedPasswordSaltValue(user.get().getPassword());
-        String securePassword = clearSaltValueInPassword(user.get().getPassword()) ;
-        if(!securePassword.equals(EncryptPassword.securePassword(passwordDetails.getPassword(),salt)))throw new InvalidDetailsFormat("Invalid Details");
+        String oldPassword = clearSaltValueInPassword(user.get().getPassword()) ;
+        if(!oldPassword.equals(EncryptPassword.securePassword(newPassword,salt)))throw new InvalidDetailsFormat("Invalid Details");
     }
 }
