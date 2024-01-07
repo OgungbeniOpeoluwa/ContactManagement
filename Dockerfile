@@ -4,5 +4,5 @@ RUN mvn clean package -DskipTests
 
 FROM openjdk:21-jdk
 COPY --from=build /target/ContactApp-1.0-SNAPSHOT.jar ContactApp.jar
-EXPOSE 9050
+EXPOSE 9060
 ENTRYPOINT ["java", "-jar", "ContactApp.jar"]
