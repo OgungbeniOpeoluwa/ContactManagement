@@ -9,6 +9,7 @@ import org.example.data.model.ContactApp;
 import org.example.data.repository.ContactAppRepository;
 import org.example.dto.request.*;
 import org.example.Exception.ActionDoneException;
+import org.example.dto.response.RegisterResponse;
 import org.example.util.EncryptPassword;
 import org.example.util.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +29,13 @@ public class ContactAppServiceImpl implements ContactAppService{
     ContactService contactService;
 
     @Override
-    public Long register(RegisterRequest registerRequest) {
+    public RegisterResponse register(RegisterRequest registerRequest) {
         checkUserEligibility(registerRequest);
         ContactApp user = Mapper.mapRegister(registerRequest);
         userRepository.save(user);
-        return user.getId();
+        RegisterResponse response = new RegisterResponse();
+        response.setId(user.getId());
+        return response;
     }
     private void checkUserEligibility(RegisterRequest registerRequest){
         if(!userExist(registerRequest.getEmail()))throw new UserExistException("user already exist");
@@ -44,7 +47,8 @@ public class ContactAppServiceImpl implements ContactAppService{
     @Override
     public void login(LoginRequest loginRequest) {
         Optional<ContactApp> user = userRepository.findById(loginRequest.getId());
-        if(user.isEmpty())throw new InvalidLoginDetailsException("Invalid details");
+        if (user.isEmpty())throw  new InvalidLoginDetailsException("Invalid login details");
+        isLocked(user.get().getId());
         verifyPasswordDetails(user.get().getId(),loginRequest.getPassword());
         if(!user.get().isLocked()) throw  new ActionDoneException("You have already login");
         user.get().setLocked(false);
@@ -55,7 +59,7 @@ public class ContactAppServiceImpl implements ContactAppService{
     @Override
     public void addContact(AddContactRequest contact) {
         Optional<ContactApp> user = userRepository.findById(contact.getId());
-        if(user.isEmpty())throw new InvalidLoginDetailsException("Invalid details");
+        userExit(user.get().getId());
         isLocked(contact.getId());
         phoneNumberException(contact.getPhoneNumber());
         contactService.addContact(contact);
@@ -84,8 +88,7 @@ public class ContactAppServiceImpl implements ContactAppService{
     @Override
     public List<Contact> findAllContact(Long id) {
         Optional<ContactApp> user = userRepository.findById(id);
-        if(user.isEmpty())throw new InvalidLoginDetailsException("Invalid details");
-        isLocked(id);
+        checkValid(user.get().getId());
         return contactService.findAllContactBelongingToUser(id);
     }
 
@@ -109,8 +112,7 @@ public class ContactAppServiceImpl implements ContactAppService{
     @Override
     public ContactApp viewProfile(Long id) {
         Optional<ContactApp> user = userRepository.findById(id);
-        if(user.isEmpty())throw new InvalidLoginDetailsException("Invalid details");
-        isLocked(id);
+        checkValid(user.get().getId());
         return user.get();
     }
 
@@ -138,12 +140,12 @@ public class ContactAppServiceImpl implements ContactAppService{
     }
 
     @Override
-    public void resetPassword(Long id, String oldPassword, String newPassword) {
+    public void resetPassword(Long id,ResetPasswordRequest passwordRequest) {
         Optional<ContactApp> contactApp = userRepository.findById(id);
-        if(contactApp.isEmpty())throw new UserExistException("Invalid details");
-        verifyPasswordDetails(id,oldPassword);
-        if(!verifyPassword(newPassword)) throw new InvalidDetailsFormat("wrong password format");
-        String password = EncryptPassword.hashPassword(newPassword);
+        userExit(contactApp.get().getId());
+        verifyPasswordDetails(id,passwordRequest.getOldPassword());
+        if(!verifyPassword(passwordRequest.getNewPassword())) throw new InvalidDetailsFormat("wrong password format");
+        String password = EncryptPassword.hashPassword(passwordRequest.getNewPassword());
         contactApp.get().setPassword(password);
         userRepository.save(contactApp.get());
 
@@ -152,13 +154,12 @@ public class ContactAppServiceImpl implements ContactAppService{
     }
 
     @Override
-    public void resetEmail(Long id, String oldEmail, String newEMail) {
+    public void resetEmail(Long id, ResetEmailRequest emailRequest) {
         Optional <ContactApp> user = userRepository.findById(id);
-        if(user.get().isLocked())throw new UserExistException("user doesn't exist");
-        isLocked(id);
-        if(!user.get().getEmail().equals(oldEmail))throw new InvalidDetailsFormat("Incorrect Email");
-        if(!verifyEmail(newEMail)) throw new InvalidDetailsFormat("Invalid Email Format");
-        user.get().setEmail(newEMail);
+       checkValid(user.get().getId());
+        if(!user.get().getEmail().equals(emailRequest.getOldEmail()))throw new InvalidDetailsFormat("Incorrect Email");
+        if(!verifyEmail(emailRequest.getNewEmail())) throw new InvalidDetailsFormat("Invalid Email Format");
+        user.get().setEmail(emailRequest.getNewEmail());
         userRepository.save(user.get());
 
     }

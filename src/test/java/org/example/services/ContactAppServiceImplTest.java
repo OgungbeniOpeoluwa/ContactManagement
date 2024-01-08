@@ -9,6 +9,7 @@ import org.example.Exception.UserExistException;
 import org.example.data.repository.ContactAppRepository;
 import org.example.data.repository.ContactRepository;
 import org.example.dto.request.*;
+import org.example.dto.response.RegisterResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -69,7 +70,7 @@ public void setUpLoginDetails(){
     }
     @Test
     public void testThatWhenUserRegisterUserIdIs1(){
-       Long register = userService.register(registerRequest);
+       RegisterResponse register = userService.register(registerRequest);
         assertNotNull(register);
         assertEquals(1,userRepository.count());
     }
@@ -80,24 +81,24 @@ public void setUpLoginDetails(){
 }
 @Test
     public void testThatUserCantLoginWithWrongPassword(){
-    Long id = userService.register(registerRequest);
-    loginRequest.setId(id);
+    RegisterResponse id = userService.register(registerRequest);
+    loginRequest.setId(id.getId());
         loginRequest.setPassword("opemmuujg123@");
     assertThrows(InvalidDetailsFormat.class,()->userService.login(loginRequest));
 }
 @Test
     public void testThatWhenUserTryToLogInWithWrongIdThrowsAndException(){
-    Long registerId = userService.register(registerRequest);
-        loginRequest.setId(registerId+1);
+    RegisterResponse registerId = userService.register(registerRequest);
+        loginRequest.setId(registerId.getId()+1);
     assertThrows(InvalidLoginDetailsException.class,()->userService.login(loginRequest));
 }
 @Test
     public void testThatWhenUserAddContact_ContactRepositoryIncreaseBy1(){
-   Long register = userService.register(registerRequest);
-    loginRequest.setId(register);
+   RegisterResponse register = userService.register(registerRequest);
+    loginRequest.setId(register.getId());
     userService.login(loginRequest);
     AddContactRequest contact =  new AddContactRequest();
-    contact.setId(register);
+    contact.setId(register.getId());
     contact.setName("tolu shola");
     contact.setPhoneNumber("+34567812345");
     userService.addContact(contact);
@@ -105,11 +106,11 @@ public void setUpLoginDetails(){
 }
 @Test
     public void testThatWhenANamesSavedTwiceOnContactItThrowsException(){
-    Long registerId = userService.register(registerRequest);
-    loginRequest.setId(registerId);
+    RegisterResponse registerId = userService.register(registerRequest);
+    loginRequest.setId(registerId.getId());
     userService.login(loginRequest);
     AddContactRequest contact =  new AddContactRequest();
-    contact.setId(registerId);
+    contact.setId(registerId.getId());
     contact.setName("tolu shola");
     contact.setPhoneNumber("08066789056");
     userService.addContact(contact);
@@ -118,28 +119,28 @@ public void setUpLoginDetails(){
 @Test
 @DisplayName("test that when a user edit phone number that is saved, it reset the old phone number")
     public void testEdit(){
-    Long registerId = userService.register(registerRequest);
-    loginRequest.setId(registerId);
+    RegisterResponse registerId = userService.register(registerRequest);
+    loginRequest.setId(registerId.getId());
     userService.login(loginRequest);
     AddContactRequest contact =  new AddContactRequest();
-    contact.setId(registerId);
+    contact.setId(registerId.getId());
     contact.setName("tolu shola");
     contact.setPhoneNumber("08066789056");
     userService.addContact(contact);
     EditContactRequest editContactRequest = new EditContactRequest();
     editContactRequest.setName("tolu shola");
-    editContactRequest.setUserId(registerId);
+    editContactRequest.setUserId(registerId.getId());
     editContactRequest.setNewPhoneNumber("+2347066221008");
     userService.editContact(editContactRequest);
-    assertEquals(editContactRequest.getNewPhoneNumber(),userService.findContact(registerId,"tolu shola").getPhoneNumber());
+    assertEquals(editContactRequest.getNewPhoneNumber(),userService.findContact(registerId.getId(),"tolu shola").getPhoneNumber());
 }
 @Test
     public void testThatWhenTwoUserSaveContactsEachAndTheyFindAllContactRelatingThemItsTheSizeOfWhatTheySaved(){
     AddContactRequest addContactRequest = new AddContactRequest();
-  Long register =  userService.register(registerRequest);
-  loginRequest.setId(register);
+  RegisterResponse register =  userService.register(registerRequest);
+  loginRequest.setId(register.getId());
     userService.login(loginRequest);
-    addContactRequest.setId(register);
+    addContactRequest.setId(register.getId());
     addContactRequest.setPhoneNumber("+234567899034");
     addContactRequest.setName("tobi shayo");
     userService.addContact(addContactRequest);
@@ -149,89 +150,95 @@ public void setUpLoginDetails(){
     registerRequest.setPhoneNumber("08099344567");
     registerRequest.setEmail("opeoluwashola@gmail.com");
     registerRequest.setPassword("Opemi@12");
-    Long registerId = userService.register(registerRequest);
+    RegisterResponse registerId = userService.register(registerRequest);
 
-    loginRequest.setId(registerId);
+    loginRequest.setId(registerId.getId());
     loginRequest.setPassword("Opemi@12");
     userService.login(loginRequest);
 
-    addContactRequest.setId(registerId);
+    addContactRequest.setId(registerId.getId());
     addContactRequest.setPhoneNumber("+2345678990");
     addContactRequest.setName("tobi small");
     userService.addContact(addContactRequest);
 
-    addContactRequest.setId(registerId);
+    addContactRequest.setId(registerId.getId());
     addContactRequest.setPhoneNumber("+3458900021345");
     addContactRequest.setName("tolu");
     userService.addContact(addContactRequest);
-    assertEquals(2,userService.findAllContact(registerId).size());
-    assertEquals(1,userService.findAllContact(register).size());
+    assertEquals(2,userService.findAllContact(registerId.getId()).size());
+    assertEquals(1,userService.findAllContact(register.getId()).size());
 }
 @Test
     public void testThatUserCanEditTheirProfile(){
-    Long id = userService.register(registerRequest);
-    loginRequest.setId(id);
+    RegisterResponse id = userService.register(registerRequest);
+    loginRequest.setId(id.getId());
     userService.login(loginRequest);
     EditProfileRequest profile = new EditProfileRequest();
-    profile.setId(id);
+    profile.setId(id.getId());
     profile.setPhoneNumber("08152865402");
     userService.editProfile(profile);
-    assertEquals("08152865402",userService.viewProfile(id).getPhoneNumber());
+    assertEquals("08152865402",userService.viewProfile(id.getId()).getPhoneNumber());
 }
 @Test
     public void testThatUserSaveTwoContactDeletedOneWhenWeFindAllContactSizeIsOne(){
-    Long id = userService.register(registerRequest);
-    loginRequest.setId(id);
+    RegisterResponse id = userService.register(registerRequest);
+    loginRequest.setId(id.getId());
     userService.login(loginRequest);
     AddContactRequest addContactRequest = new AddContactRequest();
-    addContactRequest.setId(id);
+    addContactRequest.setId(id.getId());
     addContactRequest.setPhoneNumber("+2345678990");
     addContactRequest.setName("tobi small");
     userService.addContact(addContactRequest);
 
-    addContactRequest.setId(id);
+    addContactRequest.setId(id.getId());
     addContactRequest.setPhoneNumber("+3458900021345");
     addContactRequest.setName("tolu");
     userService.addContact(addContactRequest);
-    userService.deleteContact(id,"tobi small");
-    assertEquals(1,userService.findAllContact(id).size());
-    assertThrows(InvalidContactDetails.class,()->userService.deleteContact(id,"tobi small"));
+    userService.deleteContact(id.getId(),"tobi small");
+    assertEquals(1,userService.findAllContact(id.getId()).size());
+    assertThrows(InvalidContactDetails.class,()->userService.deleteContact(id.getId(),"tobi small"));
 
 }
 @Test
     public void testThatWhenAUserDeleteAllContactSizeIs0(){
-    Long id = userService.register(registerRequest);
-    loginRequest.setId(id);
+    RegisterResponse id = userService.register(registerRequest);
+    loginRequest.setId(id.getId());
     userService.login(loginRequest);
     AddContactRequest addContactRequest = new AddContactRequest();
-    addContactRequest.setId(id);
+    addContactRequest.setId(id.getId());
     addContactRequest.setPhoneNumber("+2345678990");
     addContactRequest.setName("tobi small");
     userService.addContact(addContactRequest);
-    userService.deleteAllContact(id);
-    assertThrows(InvalidContactDetails.class,()->userService.deleteAllContact(id));
+    userService.deleteAllContact(id.getId());
+    assertThrows(InvalidContactDetails.class,()->userService.deleteAllContact(id.getId()));
 }
 @Test
     public void testThatAUserCanDeleteAccountFromContactApp(){
-    Long id = userService.register(registerRequest);
-    loginRequest.setId(id);
+    RegisterResponse id = userService.register(registerRequest);
+    loginRequest.setId(id.getId());
     userService.login(loginRequest);
-    userService.deleteAccount(id);
-    assertThrows(UserExistException.class,()->userService.deleteAccount(id));
+    userService.deleteAccount(id.getId());
+    assertThrows(UserExistException.class,()->userService.deleteAccount(id.getId()));
 }
 @Test
     public void testThatWhenUserEnterWrongOldPasswordToResetPasswordThrowsAnException(){
-    Long id = userService.register(registerRequest);
-    loginRequest.setId(id);
+    RegisterResponse id = userService.register(registerRequest);
+    loginRequest.setId(id.getId());
     userService.login(loginRequest);
-    assertThrows(InvalidDetailsFormat.class,()->userService.resetPassword(id,"wrongPassword","newPassword"));
+    ResetPasswordRequest passwordRequest = new ResetPasswordRequest();
+    passwordRequest.setOldPassword("wrongpassword");
+    passwordRequest.setNewPassword("newPassword");
+    assertThrows(InvalidDetailsFormat.class,()->userService.resetPassword(id.getId(),passwordRequest));
 }
 @Test
  public void testThatWhenUserProvideWrongEmailToResetItThrowsAnException(){
-    Long id = userService.register(registerRequest);
-    loginRequest.setId(id);
+    RegisterResponse id = userService.register(registerRequest);
+    loginRequest.setId(id.getId());
     userService.login(loginRequest);
-    assertThrows(InvalidDetailsFormat.class,()->userService.resetEmail(id,"opemip@gmail.com","Opemipo@gmail.com"));
+    ResetEmailRequest emailRequest = new ResetEmailRequest();
+    emailRequest.setOldEmail("opemip@gmail.com");
+    emailRequest.setNewEmail("Opemipo@gmail.com");
+    assertThrows(InvalidDetailsFormat.class,()->userService.resetEmail(id.getId(),emailRequest));
 }
 
 

@@ -3,12 +3,13 @@ package org.example.services;
 import org.example.data.model.Contact;
 import org.example.data.model.ContactApp;
 import org.example.dto.request.*;
+import org.example.dto.response.RegisterResponse;
 
 import java.util.List;
 
 
 public interface ContactAppService {
-    Long register(RegisterRequest registerRequest);
+    RegisterResponse register(RegisterRequest registerRequest);
 
     void login(LoginRequest loginRequest);
 
@@ -30,9 +31,9 @@ public interface ContactAppService {
 
     void deleteAccount(Long id);
 
-    void resetPassword(Long id, String oldPassword, String newPassword);
+    void resetPassword(Long id, ResetPasswordRequest passwordRequest);
 
-    void resetEmail(Long id, String oldEmail, String newMail1);
+    void resetEmail(Long id, ResetEmailRequest emailRequest);
     void blockedContact(Long id,String contactName);
 
     void unBlockContact(long id,String contactName);

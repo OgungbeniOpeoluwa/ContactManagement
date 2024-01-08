@@ -19,7 +19,7 @@ public class ContactAppController {
     public ResponseEntity<?>register(@RequestBody RegisterRequest registerRequest){
         RegisterResponse registerResponse = new RegisterResponse();
         try{
-            registerResponse.setId(contactAppService.register(registerRequest));
+            registerResponse.setId(contactAppService.register(registerRequest).getId());
             registerResponse.setMessage("Account has been created");
            return new ResponseEntity<>(new ApiResponse(registerResponse,true), HttpStatus.ACCEPTED);
         }
@@ -121,7 +121,7 @@ public class ContactAppController {
     public ResponseEntity<?> resetPassword(@PathVariable("id")Long id,@RequestBody ResetPasswordRequest request){
         ResetPasswordResponse response = new ResetPasswordResponse();
         try{
-            contactAppService.resetPassword(id,request.getOldPassword(),request.getNewPassword());
+            contactAppService.resetPassword(id,request);
             response.setMessage("password has been updated");
             return new ResponseEntity<>(new ApiResponse(response,true),HttpStatus.ACCEPTED);
         }
@@ -134,7 +134,7 @@ public class ContactAppController {
     public ResponseEntity<?> resetEmail(@PathVariable("id")Long id, @RequestBody ResetEmailRequest emailRequest){
         ResetEmailResponse response = new ResetEmailResponse();
         try{
-            contactAppService.resetEmail(id,emailRequest.getOldEmail(), emailRequest.getNewEmail());
+            contactAppService.resetEmail(id,emailRequest);
             response.setMessage("Your email has been updated successfully");
             return new ResponseEntity<>(new ApiResponse(response,true),HttpStatus.ACCEPTED);
         }
